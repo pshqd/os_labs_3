@@ -1,0 +1,19 @@
+# Скомпилированный бинарник
+secure_copy
+
+# Артефакты тестов
+outdir/
+test_inputs/
+roundtrip_out/
+log.txt
+
+# Объектные файлы
+*.o
+*.a
+
+# macOS мусор
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

@@ -49,7 +49,7 @@ public:
             elapsed_sec);
 
         // Захватываем мьютекс только на момент записи в файл
-        int rc = mutex_timedlock(&mutex_, 5);
+        int rc = mutex_timedlock(mutex, 5);
 
         if (rc == ETIMEDOUT) {
             fprintf(stderr,
