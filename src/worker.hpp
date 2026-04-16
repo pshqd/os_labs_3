@@ -27,7 +27,7 @@ void* worker_thread(void* arg) {
 
     // Создаём выходную директорию если не существует
     mkdir(args->output_dir, 0755);
-
+    
     while (true) {
         // 1. Берём следующий файл из очереди
         std::string filepath = args->queue->next_file();
@@ -67,7 +67,7 @@ void* worker_thread(void* arg) {
         fclose(fin);
 
         // 3. Шифруем через caesar XOR
-        set_key(args->key);
+        
         caesar(buf, buf, (int)file_size);  // src == dst — допустимо
 
         // 4. Пишем в выходной файл

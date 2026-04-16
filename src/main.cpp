@@ -26,10 +26,6 @@ int main(int argc, char* argv[]) {
         files.push_back(argv[i]);
     }
 
-    if (files.empty()) {
-        std::cerr << "Error: no input files provided\n";
-        return 1;
-    }
 
     // Создаём общие объекты — один на всю программу
     FileQueue queue(files);
@@ -43,7 +39,7 @@ int main(int argc, char* argv[]) {
         args[i].output_dir = output_dir;
         args[i].key        = key;
     }
-
+    set_key(args->key);
     // Запускаем 3 потока
     pthread_t threads[NUM_WORKERS];
     for (int i = 0; i < NUM_WORKERS; i++) {
