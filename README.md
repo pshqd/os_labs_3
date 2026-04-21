@@ -182,4 +182,3 @@ make clean    # удалить бинарник, log.txt, outdir/
 - `g++` с поддержкой C++17
 - `libcaesar.so` (собирается из `caesar.cpp`)
 - POSIX threads (`-pthread`)
-```

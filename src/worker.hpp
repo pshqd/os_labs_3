@@ -7,6 +7,8 @@
 #include <sys/stat.h>   // mkdir
 #include "file_queue.hpp"
 #include "logger.hpp"
+#include "stats.hpp"
+
 
 // Объявление функций из libcaesar.so
 extern "C" {
@@ -20,6 +22,8 @@ struct WorkerArgs {
     Logger*     logger;
     const char* output_dir;
     char        key;
+    std::vector<FileStats>* stats_vec;
+    pthread_mutex_t*        stats_mutex;
 };
 
 void* worker_thread(void* arg) {
@@ -93,6 +97,14 @@ void* worker_thread(void* arg) {
                        + (t_end.tv_nsec - t_start.tv_nsec) / 1e9;
 
         args->logger->log(args->queue->get_mutex(), filepath, success, elapsed);
+
+        FileStats fs;
+        fs.filename = filename;   // filename уже вычислен выше в воркере
+        fs.duration = elapsed;
+        fs.success  = success;
+        pthread_mutex_lock(args->stats_mutex);
+        args->stats_vec->push_back(fs);
+        pthread_mutex_unlock(args->stats_mutex);
     }
 
     return nullptr;

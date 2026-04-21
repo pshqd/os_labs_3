@@ -22,8 +22,10 @@ clean:
 	rm -f $(TARGET)
 	rm -f log.txt
 	rm -rf outdir/
+	rm -rf test_inputs/
 
 # Создаём 5 тестовых файлов и запускаем программу
+# ← changed: добавили --mode=parallel, исправили i=1→i=2 в аргументах
 test: all
 	mkdir -p test_inputs
 	echo "File one content"   > test_inputs/file1.txt
@@ -31,7 +33,8 @@ test: all
 	echo "File three content" > test_inputs/file3.txt
 	echo "File four content"  > test_inputs/file4.txt
 	echo "File five content"  > test_inputs/file5.txt
-	./$(TARGET) test_inputs/file1.txt test_inputs/file2.txt \
+	./$(TARGET) --mode=parallel \
+	            test_inputs/file1.txt test_inputs/file2.txt \
 	            test_inputs/file3.txt test_inputs/file4.txt \
 	            test_inputs/file5.txt outdir/ K
 	@echo ""
@@ -41,13 +44,56 @@ test: all
 	@echo "=== log.txt ==="
 	@cat log.txt
 
+# тест для ПР4 — 10 файлов, демонстрирует все три режима
+# Запускается на защите: make test4
+test4: all
+	mkdir -p test_inputs
+	@for i in 1 2 3 4 5 6 7 8 9 10; do \
+	    echo "Lab4 test file $$i — some content to encrypt" \
+	        > test_inputs/file$$i.txt; \
+	done
+	@echo ""
+	@echo "=== sequential mode (10 files) ==="
+	./$(TARGET) --mode=sequential \
+	    test_inputs/file1.txt  test_inputs/file2.txt \
+	    test_inputs/file3.txt  test_inputs/file4.txt \
+	    test_inputs/file5.txt  test_inputs/file6.txt \
+	    test_inputs/file7.txt  test_inputs/file8.txt \
+	    test_inputs/file9.txt  test_inputs/file10.txt \
+	    outdir/ K
+	@echo ""
+	@echo "=== parallel mode (10 files) ==="
+	./$(TARGET) --mode=parallel \
+	    test_inputs/file1.txt  test_inputs/file2.txt \
+	    test_inputs/file3.txt  test_inputs/file4.txt \
+	    test_inputs/file5.txt  test_inputs/file6.txt \
+	    test_inputs/file7.txt  test_inputs/file8.txt \
+	    test_inputs/file9.txt  test_inputs/file10.txt \
+	    outdir/ K
+	@echo ""
+	@echo "=== auto mode (10 files — should pick parallel) ==="
+	./$(TARGET) --mode=auto \
+	    test_inputs/file1.txt  test_inputs/file2.txt \
+	    test_inputs/file3.txt  test_inputs/file4.txt \
+	    test_inputs/file5.txt  test_inputs/file6.txt \
+	    test_inputs/file7.txt  test_inputs/file8.txt \
+	    test_inputs/file9.txt  test_inputs/file10.txt \
+	    outdir/ K
+	@echo ""
+	@echo "=== auto mode (3 files — should pick sequential) ==="
+	./$(TARGET) --mode=auto \
+	    test_inputs/file1.txt test_inputs/file2.txt \
+	    test_inputs/file3.txt \
+	    outdir/ K
+
 # Проверяем шифрование: зашифровать и расшифровать = оригинал
+# ← changed: добавили --mode=sequential (1 файл → sequential логично)
 test_roundtrip: all
 	mkdir -p test_inputs roundtrip_out
 	echo "Hello roundtrip" > test_inputs/roundtrip.txt
-	./$(TARGET) test_inputs/roundtrip.txt outdir/ K
-	./$(TARGET) outdir/roundtrip.txt roundtrip_out/ K
+	./$(TARGET) --mode=sequential test_inputs/roundtrip.txt outdir/ K
+	./$(TARGET) --mode=sequential outdir/roundtrip.txt roundtrip_out/ K
 	diff test_inputs/roundtrip.txt roundtrip_out/roundtrip.txt \
 		&& echo "ROUNDTRIP PASSED" || echo "ROUNDTRIP FAILED"
 
-.PHONY: all clean test test_roundtrip
+.PHONY: all clean test test4 test_roundtrip   # ← changed: добавили test4
